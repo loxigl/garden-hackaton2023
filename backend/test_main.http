@@ -1,26 +1,51 @@
 # Test your FastAPI endpoints
 
-GET http://127.0.0.1:8000/api/get
+GET http://127.0.0.1:8000/api/temperature_sensor/average
 Accept: application/json
 
 ###
 
-POST http://127.0.0.1:8000/api/set
+POST http://127.0.0.1:8000/api/temperature_sensor/set
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/api/get/average
+GET http://127.0.0.1:8000/api/temperature_sensor/temperature
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/api/get/humidity
+GET http://127.0.0.1:8000/api/temperature_sensor/humidity
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/api/get/temperature
+GET http://127.0.0.1:8000/api/temperature_sensor/temperature_humidity
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/api/temperature_sensor/get
+Accept: application/json
+
+###
+POST http://127.0.0.1:8000/api/vibration_sensor/set
+Accept: application/json
+
+###
+POST http://127.0.0.1:8000/api/water_sensor/set
+Accept: application/json
+
+###
+GET  http://127.0.0.1:8000/api/get_all
+Accept: application/json
+
+###
+GET http://127.0.0.1:8000/api/vibration_sensor/get
+Accept: application/json
+
+###
+GET http://127.0.0.1:8000/api/water_sensor/get
 Accept: application/json
 
 ###
