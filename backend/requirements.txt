@@ -3,3 +3,4 @@ influxdb3-python
 python-dotenv~=1.0.0
 pandas
 influxdb-client
+websockets

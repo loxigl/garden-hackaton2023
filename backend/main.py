@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 import influxdb_client, os, time
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -28,10 +28,74 @@ url = "http://62.109.26.57:8086"
 write_client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
 
 
-@app.get("/api/get")
-async def root(timestamp: str):
-    query_api = write_client.query_api()
+@app.websocket("/api/ws")
+async def websocket_endpoint(websocket: WebSocket, timestamp: str):
+    await websocket.accept()
+    err = False
 
+    while (True):
+        records = []
+        timestamp = timestamp
+        query_api = write_client.query_api()
+        query = """from(bucket: "sensors")
+                             |> range(start: """ + timestamp + """)
+
+                             """
+        tables = query_api.query(query, org="my-org")
+        result = []
+        for t in tables:
+            record = t.records
+            record[0].row = None
+            records += record
+        for r in records:
+            result += [{'time': r.values["_time"].time().strftime("%H:%M:%S"), "humidity": r.values['humidity'],
+                        "temperature": r.values["temperature"]}]
+        data = str(result)
+        time.sleep(5)
+        await websocket.send_text(data)
+
+
+@app.get("/api/get/humidity")
+async def get_humidity(timestamp: str):
+    query_api = write_client.query_api()
+    query = """from(bucket: "sensors")
+         |> range(start: """ + timestamp + """)
+
+         """
+    tables = query_api.query(query, org="my-org")
+    records = []
+    result = []
+    for t in tables:
+        record = t.records
+        record[0].row = None
+        records += record
+    for r in records:
+        result += [{'time': r.values["_time"].time().strftime("%H:%M:%S"), "humidity": r.values['humidity']}]
+    return result
+
+
+@app.get("/api/get/temperature")
+async def get_temperature(timestamp: str):
+    query_api = write_client.query_api()
+    query = """from(bucket: "sensors")
+         |> range(start: """ + timestamp + """)
+
+         """
+    tables = query_api.query(query, org="my-org")
+    records = []
+    result = []
+    for t in tables:
+        record = t.records
+        record[0].row = None
+        records += record
+    for r in records:
+        result += [{'time': r.values["_time"].time().strftime("%H:%M:%S"), "temperature": r.values['temperature']}]
+    return result
+
+
+@app.get("/api/get")
+async def get_all(timestamp: str):
+    query_api = write_client.query_api()
     query = """from(bucket: "sensors")
      |> range(start: """ + timestamp + """)
      
@@ -42,12 +106,11 @@ async def root(timestamp: str):
         record = t.records
         record[0].row = None
         records += record
-
     return records
 
 
 @app.get("/api/get/average")
-async def root(timestamp: str):
+async def get_average(timestamp: str):
     query_api = write_client.query_api()
 
     query = """from(bucket: "sensors")
@@ -71,10 +134,11 @@ async def root(timestamp: str):
 
 
 @app.post("/api/set")
-async def say_hello(sensor_id: int, temperature: float, humidity: float):
-    write_api = write_client.write_api(write_options=SYNCHRONOUS)
+async def setter(sensor_id: int, temperature: float, humidity: float):
+    write_api = write_client.write_api(write_options=SYNCHRONOUS, )
     bucket = "sensors"
     point = (
         Point("temperature_sensor").tag("temperature", temperature).tag("humidity", humidity).field("id", sensor_id)
     )
+
     return write_api.write(bucket=bucket, org="my-org", record=point)

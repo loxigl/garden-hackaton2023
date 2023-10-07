@@ -9,3 +9,18 @@ POST http://127.0.0.1:8000/api/set
 Accept: application/json
 
 ###
+
+GET http://127.0.0.1:8000/api/get/average
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/api/get/humidity
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/api/get/temperature
+Accept: application/json
+
+###
