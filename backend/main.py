@@ -147,11 +147,14 @@ async def get_vibration(timestamp: str):
          """
     tables = query_api.query(query, org="my-org")
     records = []
+    result = []
     for t in tables:
         record = t.records
         record[0].row = None
         records += record
-    result = sorted(records, key=itemgetter('time'))
+    for r in records:
+        result += [{'time': r.values["_time"].time().strftime("%H:%M:%S"), "vibration": r.values['status']}]
+    result = sorted(result, key=itemgetter('time'))
     return result
 
 
@@ -164,11 +167,14 @@ async def get_water(timestamp: str):
      """
     tables = query_api.query(query, org="my-org")
     records = []
+    result = []
     for t in tables:
         record = t.records
         record[0].row = None
         records += record
-    result = sorted(records, key=itemgetter('time'))
+    for r in records:
+        result += [{'time': r.values["_time"].time().strftime("%H:%M:%S"), "water_level": r.values['water_level']}]
+    result = sorted(result, key=itemgetter('time'))
     return result
 
 
