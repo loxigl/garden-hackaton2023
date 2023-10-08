@@ -119,7 +119,9 @@ async def get_average(timestamp: str):
 
     query = """from(bucket: "sensors")
      |> range(start: -""" + timestamp + """)
-     |> filter(fn: (r) => r["_measurement"] == "temperature_sensor")
+     |>  filter(fn: (r) => r["_measurement"] == "vibration_sensor" 
+     or r["_measurement"] == "water_sensor" 
+     or r["_measurement"] == "temperature_sensor")
      """
     tables = query_api.query(query, org="my-org")
     records = []
@@ -129,13 +131,37 @@ async def get_average(timestamp: str):
         records += record
     sum_hum = 0
     sum_tem = 0
+    sum_water = 0
+    sum_vibr = 0
+
+    count_water = 0
+    count_vibr : float = 0
     count = 0
     for r in records:
-        sum_hum += float(r.values["humidity"])
-        sum_tem += float(r.values["temperature"])
+        values = r.values
+        if values["_measurement"] == "temperature_sensor":
+            sum_hum += float(values["humidity"])
+            sum_tem += float(values["temperature"])
+        elif values["_measurement"] == "water_sensor":
+            sum_water += float(values["water_level"])
+            count_water += 1
+        elif values["_measurement"] == "vibration_sensor":
+            v = 0
+            if bool(values["status"]):
+                v = 1
+            sum_vibr += v
+            count_vibr += 1
         count += 1
-    result = {"avg_temp": sum_tem / count, "avg_humidity": sum_hum / count}
+
+    if count_water == 0:
+        count_water = 1
+    if count_vibr == 0:
+        count_vibr = 1
+    if count == 0:
+        count = 1
+    result = {"avg_temp": sum_tem / count, "avg_humidity": sum_hum / count, "avg_water_level": sum_water/count_water, "avg_vibration": sum_vibr/count_vibr}
     return result
+
 
 
 @app.get('/api/vibration_sensor/get')
@@ -183,7 +209,9 @@ async def get_all(timestamp: str):
     query_api = write_client.query_api()
     query = """from(bucket: "sensors")
     |> range(start: -""" + timestamp + """)
-    |> filter(fn: (r) => r["_measurement"] == "temperature_sensor")
+    |>  filter(fn: (r) => r["_measurement"] == "vibration_sensor" 
+     or r["_measurement"] == "water_sensor" 
+     or r["_measurement"] == "temperature_sensor")
     """
     results = []
     i = 0
