@@ -1,9 +1,0 @@
----
-# Create docker container tasks for frontend, backend, bot apps
-- name: Start hackaton-api container
-  community.docker.docker_container:
-    name: hackaton-api
-    image: yahuman/hacaton_api:0.5
-    restart_policy: always
-    ports:
-      - "8080:80"
