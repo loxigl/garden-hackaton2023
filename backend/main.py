@@ -7,6 +7,7 @@ import influxdb_client, os, time
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 import dotenv
+from fastapi.middleware.cors import CORSMiddleware
 
 
 class DictObj:
@@ -20,6 +21,8 @@ class DictObj:
 
 
 app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"],
+                   allow_headers=["*"])
 print(os.getcwd())
 dotenv.load_dotenv(os.getcwd() + "/.env")
 token = os.environ.get("INFLUXDB_TOKEN")
