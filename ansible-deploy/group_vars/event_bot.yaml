@@ -1,3 +1,0 @@
-app:
-  name: "event-bot"
-  image: "registry.stravir.ru/devupsen/workshops/22-11-2022-go-ci/event-bot:latest"

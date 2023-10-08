@@ -1,2 +1,0 @@
-[all]
-node-1 ansible_host=62.109.26.57 ansible_user=root ansible_password=root1234
