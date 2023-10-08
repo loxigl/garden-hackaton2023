@@ -1,4 +1,5 @@
 import json
+from operator import itemgetter
 from dataclasses import dataclass
 
 import uvicorn
@@ -48,6 +49,7 @@ async def get_humidity(timestamp: str):
         records += record
     for r in records:
         result += [{'time': r.values["_time"].time().strftime("%H:%M:%S"), "humidity": r.values['humidity']}]
+    result = sorted(result, key=itemgetter('time'))
     return result
 
 
@@ -57,6 +59,7 @@ async def get_tem_hum(timestamp: str):
     query = """from(bucket: "sensors")
              |> range(start: -""" + timestamp + """)
              |> filter(fn: (r) => r["_measurement"] == "temperature_sensor")
+             |>sort(columns: ["_time"], desc: false)
              """
     tables = query_api.query(query, org="my-org")
     records = []
@@ -68,6 +71,7 @@ async def get_tem_hum(timestamp: str):
     for r in records:
         result += [{'time': r.values["_time"].time().strftime("%H:%M:%S"), "temperature": r.values['temperature'],
                     "humidity": r.values['humidity']}]
+    result = sorted(result, key=itemgetter('time'))
     return result
 
 
@@ -77,6 +81,7 @@ async def get_temperature(timestamp: str):
     query = """from(bucket: "sensors")
      |> range(start: -""" + timestamp + """)
      |> filter(fn: (r) => r["_measurement"] == "temperature_sensor")
+     |>sort(columns: ["_time"], desc: false)
      """
     tables = query_api.query(query, org="my-org")
     records = []
@@ -87,6 +92,7 @@ async def get_temperature(timestamp: str):
         records += record
     for r in records:
         result += [{'time': r.values["_time"].time().strftime("%H:%M:%S"), "temperature": r.values['temperature']}]
+    result = sorted(result, key=itemgetter('time'))
     return result
 
 
@@ -103,6 +109,7 @@ async def get_all(timestamp: str):
         record = t.records
         record[0].row = None
         records += record
+
     return records
 
 
@@ -144,7 +151,8 @@ async def get_vibration(timestamp: str):
         record = t.records
         record[0].row = None
         records += record
-    return records
+    result = sorted(records, key=itemgetter('time'))
+    return result
 
 
 @app.get('/api/water_sensor/get')
@@ -160,7 +168,8 @@ async def get_water(timestamp: str):
         record = t.records
         record[0].row = None
         records += record
-    return records
+    result = sorted(records, key=itemgetter('time'))
+    return result
 
 
 @app.get("/api/get_all")
